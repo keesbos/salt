@@ -133,6 +133,24 @@ name) is set in the :conf_minion:`master` configuration setting.
 
     master_uri_format: ip_only
 
+.. conf_minion:: master_tops_first
+
+``master_tops_first``
+---------------------
+
+.. versionadded:: Oxygen
+
+Default: ``False``
+
+SLS targets defined using the :ref:`Master Tops <master-tops-system>` system
+are normally executed *after* any matches defined in the :ref:`Top File
+<states-top>`. Set this option to ``True`` to have the minion execute the
+:ref:`Master Tops <master-tops-system>` states first.
+
+.. code-block:: yaml
+
+    master_tops_first: True
+
 .. conf_minion:: master_type
 
 ``master_type``
@@ -448,6 +466,20 @@ FQDN (for instance, Solaris).
 
     append_domain: foo.org
 
+.. conf_minion:: minion_id_lowercase
+
+``minion_id_lowercase``
+-----------------------
+
+Default: ``False``
+
+Convert minion id to lowercase when it is being generated. Helpful when some hosts
+get the minion id in uppercase. Cached ids will remain the same and not converted.
+
+.. code-block:: yaml
+
+    minion_id_lowercase: True
+
 .. conf_minion:: cachedir
 
 ``cachedir``
@@ -674,7 +706,7 @@ Note these can be defined in the pillar for a minion as well.
 
 Default: ``60``
 
-The number of seconds a mine update runs.
+The number of minutes between mine updates.
 
 .. code-block:: yaml
 
@@ -2081,6 +2113,41 @@ It will be interpreted as megabytes.
 
     file_recv_max_size: 100
 
+.. conf_minion:: pass_to_ext_pillars
+
+``pass_to_ext_pillars``
+-----------------------
+
+Specify a list of configuration keys whose values are to be passed to
+external pillar functions.
+
+Suboptions can be specified using the ':' notation (i.e. ``option:suboption``)
+
+The values are merged and included in the ``extra_minion_data`` optional
+parameter of the external pillar function.  The ``extra_minion_data`` parameter
+is passed only to the external pillar functions that have it explicitly
+specified in their definition.
+
+If the config contains
+
+.. code-block:: yaml
+
+    opt1: value1
+    opt2:
+      subopt1: value2
+      subopt2: value3
+
+    pass_to_ext_pillars:
+      - opt1
+      - opt2: subopt1
+
+the ``extra_minion_data`` parameter will be
+
+.. code-block:: python
+
+    {'opt1': 'value1',
+     'opt2': {'subopt1': 'value2'}}
+
 Security Settings
 =================
 
@@ -2337,11 +2404,14 @@ Thread Settings
 
 .. conf_minion:: multiprocessing
 
+``multiprocessing``
+-------
+
 Default: ``True``
 
-If `multiprocessing` is enabled when a minion receives a
+If ``multiprocessing`` is enabled when a minion receives a
 publication a new process is spawned and the command is executed therein.
-Conversely, if `multiprocessing` is disabled the new publication will be run
+Conversely, if ``multiprocessing`` is disabled the new publication will be run
 executed in a thread.
 
 
@@ -2349,6 +2419,23 @@ executed in a thread.
 
     multiprocessing: True
 
+.. conf_minion:: process_count_max
+
+``process_count_max``
+-------
+
+.. versionadded:: Oxygen
+
+Default: ``-1``
+
+Limit the maximum amount of processes or threads created by ``salt-minion``.
+This is useful to avoid resource exhaustion in case the minion receives more
+publications than it is able to handle, as it limits the number of spawned
+processes or threads. ``-1`` is the default and disables the limit.
+
+.. code-block:: yaml
+
+    process_count_max: -1
 
 .. _minion-logging-settings:
 

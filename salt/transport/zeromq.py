@@ -21,6 +21,7 @@ import salt.crypt
 import salt.utils
 import salt.utils.verify
 import salt.utils.event
+import salt.utils.stringutils
 import salt.payload
 import salt.transport.client
 import salt.transport.server
@@ -46,7 +47,7 @@ import tornado.gen
 import tornado.concurrent
 
 # Import third party libs
-import salt.ext.six as six
+from salt.ext import six
 try:
     from Cryptodome.Cipher import PKCS1_OAEP
 except ImportError:
@@ -304,7 +305,7 @@ class AsyncZeroMQPubChannel(salt.transport.mixins.auth.AESPubClientMixin, salt.t
         else:
             self._socket.setsockopt(zmq.SUBSCRIBE, b'')
 
-        self._socket.setsockopt(zmq.IDENTITY, salt.utils.to_bytes(self.opts['id']))
+        self._socket.setsockopt(zmq.IDENTITY, salt.utils.stringutils.to_bytes(self.opts['id']))
 
         # TODO: cleanup all the socket opts stuff
         if hasattr(zmq, 'TCP_KEEPALIVE'):
@@ -826,8 +827,9 @@ class ZeroMQPubServerChannel(salt.transport.server.PubServerChannel):
         match_targets = ["pcre", "glob", "list"]
         if self.opts['zmq_filtering'] and load['tgt_type'] in match_targets:
             # Fetch a list of minions that match
-            match_ids = self.ckminions.check_minions(load['tgt'],
-                                                     tgt_type=load['tgt_type'])
+            _res = self.ckminions.check_minions(load['tgt'],
+                                                tgt_type=load['tgt_type'])
+            match_ids = _res['minions']
 
             log.debug("Publish Side Match: {0}".format(match_ids))
             # Send list of miions thru so zmq can target them

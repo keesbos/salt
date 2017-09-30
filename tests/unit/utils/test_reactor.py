@@ -8,8 +8,8 @@ import os
 import textwrap
 import yaml
 
-import salt.utils
 import salt.loader
+import salt.utils
 import salt.utils.reactor as reactor
 
 from tests.support.unit import TestCase, skipIf
